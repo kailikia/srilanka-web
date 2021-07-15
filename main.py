@@ -10,7 +10,7 @@ import functools
 cloudinary.config(cloud_name='drezt4si4', api_key="264118375198766", api_secret="ENJyiF-pECeilBaLYwhQY1SE06A")
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "thisisasecretkey"
+app.config['SECRET_KEY'] = "hgfgcvbhcgh*@gB544$5"
 
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 db = SQLAlchemy(app)
