@@ -33,14 +33,14 @@ def create_tables():
     # pass
 
 
-# def login_required(func):
-#     @functools.wraps(func)
-#     def secure_function(*args, **kwargs):
-#         if "email" not in session:
-#             return redirect(url_for("login", next=request.url))
-#         return func(*args, **kwargs)
+def login_required(func):
+    @functools.wraps(func)
+    def secure_function(*args, **kwargs):
+        if "email" not in session:
+            return redirect(url_for("login", next=request.url))
+        return func(*args, **kwargs)
 
-#     return secure_function
+    return secure_function
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
@@ -68,90 +68,13 @@ def login():
 def home():
     return render_template("index.html")
 
-@app.route('/admin-news', methods = ['GET', 'POST'])
-def admin_news():
-    if 'email' not in session:
-        return redirect(url_for("login"))
-
-    print("my logged session", session)
-    if request.method == 'POST':
-        title = request.form['title']
-        description = request.form['description']
-
-        news = News(title = title, description = description)
-        db.session.add(news)
-        db.session.commit()
-        flash("News added successfully", "success")
-        return redirect(url_for('admin_news'))
-    
-    news_items = News.query.all()
-
-    return render_template("admin_news.html", news_items = news_items)
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@app.route('/admin-images', methods = ['GET', 'POST'])
-def admin_images():
-    if 'email' not in session:
-        return redirect(url_for("login"))
-
-    print("my logged session", session)
-    if request.method == 'POST':        
-        image = request.files['file']
-        link = request.form['link']
-
-        # check if the post request has the file part
-        # if 'image' not in image:
-            # flash('No file part','danger')
-        print("image", type(image))
-        # return redirect(request.url)
-        # print(image)
-
-        file = image
-
-        if file.filename == '':
-            # flash('No selected file','danger')
-            print("No file selected")
-            return redirect(request.url)
-
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-
-            # upload the file to cloudinary
-            upload_data = cloudinary.uploader.upload(file)
-
-
-        data = ExternalLink(image=upload_data['secure_url'], link=link)
-        db.session.add(data)
-        db.session.commit()
-        flash("External link added successfully", "success")
-        return redirect(url_for('admin_images'))
-        
-    images = ExternalLink.query.all()
-        
-    return render_template("admin_external_links.html", images = images)
-
-@app.route('/admin-clients', methods = ['GET', 'POST'])
-def admin_clients():
-    if 'email' not in session:
-        return redirect(url_for("login"))
-
-    print("my logged session", session)
-    clients = Client.query.all()
-
-    return render_template("clients.html", clients = clients)
-
 @app.route('/high-commission')
 def high_commision():
     return render_template("high_commision.html")
 
 @app.route('/whats-new')
 def whats_new():
-
     news_items = News.query.all()
-
     return render_template("whatsNew.html", news_items=news_items)
 
 @app.route('/office-hours')
@@ -220,6 +143,86 @@ def contact():
         return redirect(url_for('contact'))
         
     return render_template("contact.html")
+
+
+#### ADMIN ROUTES
+
+@app.route('/admin/news', methods = ['GET', 'POST'])
+@login_required
+def admin_news():
+    if 'email' not in session:
+        return redirect(url_for("login"))
+
+    print("my logged session", session)
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+
+        news = News(title = title, description = description)
+        db.session.add(news)
+        db.session.commit()
+        flash("News added successfully", "success")
+        return redirect(url_for('admin_news'))
+    
+    news_items = News.query.all()
+
+    return render_template("admin_news.html", news_items = news_items)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/admin/images', methods = ['GET', 'POST'])
+@login_required
+def admin_images():
+    if 'email' not in session:
+        return redirect(url_for("login"))
+
+    print("my logged session", session)
+    if request.method == 'POST':        
+        image = request.files['file']
+        link = request.form['link']
+
+        # check if the post request has the file part
+        # if 'image' not in image:
+            # flash('No file part','danger')
+        print("image", type(image))
+        # return redirect(request.url)
+        # print(image)
+
+        file = image
+
+        if file.filename == '':
+            # flash('No selected file','danger')
+            print("No file selected")
+            return redirect(request.url)
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+
+            # upload the file to cloudinary
+            upload_data = cloudinary.uploader.upload(file)
+
+
+        data = ExternalLink(image=upload_data['secure_url'], link=link)
+        db.session.add(data)
+        db.session.commit()
+        flash("External link added successfully", "success")
+        return redirect(url_for('admin_images'))
+        
+    images = ExternalLink.query.all()
+        
+    return render_template("admin_external_links.html", images = images)
+
+@app.route('/admin/clients', methods = ['GET', 'POST'])
+@login_required
+def admin_clients():
+    if 'email' not in session:
+        return redirect(url_for("login"))
+    print("my logged session", session)
+    clients = Client.query.all()
+
+    return render_template("clients.html", clients = clients)
 
 
 @app.route('/logout')
