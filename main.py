@@ -162,7 +162,7 @@ def office_hours():
 def sri_lanka():
     return render_template("/srilanka_kenya.html")
 
-@app.route('/register', methods = ['GET', 'POST'])
+@app.route('/register-with-embassy', methods = ['GET', 'POST'])
 def register():
     if request.method == 'POST':
         title = request.form['title']
