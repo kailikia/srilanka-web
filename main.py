@@ -33,6 +33,7 @@ def create_tables():
     pass
 
 
+
 def login_required(func):
     @functools.wraps(func)
     def secure_function(*args, **kwargs):
